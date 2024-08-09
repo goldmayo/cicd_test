@@ -17,6 +17,10 @@ jobs:
         run: |
           echo "${{ secrets.EC2_KEY }}" | base64 -d > aikey.pem
           chmod 400 aikey.pem
+          echo "SSH Key Created:"
+          ls -la aikey.pem  # 파일의 권한과 존재 여부를 확인
+          echo "SSH Key Content:"
+          cat aikey.pem  # 키 내용의 일부를 확인 (보안상 일부만 출력 권장)
 
       - name: Set up project directory on EC2
         run: |

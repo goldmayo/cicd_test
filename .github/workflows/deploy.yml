@@ -1,5 +1,3 @@
-name: Deploy to EC2
-
 on:
   push:
     branches:
@@ -20,11 +18,11 @@ jobs:
           echo "SSH Key Created:"
           ls -la aikey.pem  # 파일의 권한과 존재 여부를 확인
           echo "SSH Key Content:"
-          cat aikey.pem  # 키 내용의 일부를 확인 (보안상 일부만 출력 권장)
+          head -n 5 aikey.pem  # 키 내용의 일부만 출력 (보안상 이유로 일부만 출력)
 
       - name: Set up project directory on EC2
         run: |
-            ssh -v -o StrictHostKeyChecking=no -i aikey.pem ${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }}
+          ssh -v -o StrictHostKeyChecking=no -i aikey.pem ${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }} << EOF
             mkdir -p ~/project-root
             chown $USER:$USER ~/project-root
             chmod 755 ~/project-root
@@ -36,7 +34,7 @@ jobs:
 
       - name: Deploy on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i aikey.pem ${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i aikey.pem ${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }} << EOF
             cd ~/project-root
             docker-compose down || true
             docker-compose up -d --build

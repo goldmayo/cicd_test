@@ -15,8 +15,8 @@ jobs:
 
       - name: Set up SSH
         run: |
-          echo "${{ secrets.EC2_KEY }}" | base64 -d > deploy_key.pem
-          chmod 600 deploy_key.pem
+          echo "${{ secrets.EC2_KEY }}" | base64 -d > aikey.pem
+          chmod 600 aikey.pem
 
       - name: Copy files to EC2
         run: |

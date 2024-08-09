@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  backend:
+    build: .
+    image: kurigohan73/backend:latest
+    container_name: backend
+    restart: unless-stopped
+    environment:
+      DATABASE_HOST: mysql
+      DATABASE_USER: myuser
+      DATABASE_PASSWORD: mypassword
+      DATABASE_NAME: mydatabase
+    ports:
+      - "443:443"
+    volumes:
+      - /home/ec2-user/keycloak/fullchain.pem:/etc/ssl/certs/fullchain.pem
+      - /home/ec2-user/keycloak/privkey.pem:/etc/ssl/private/privkey.pem
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:

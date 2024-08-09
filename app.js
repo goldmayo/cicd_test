@@ -27,4 +27,9 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
+// HTTPS 서버 시작
+https.createServer(sslOptions, app).listen(443, () => {
+  console.log('HTTPS Server running on port 443');
+});
+
 module.exports = app;

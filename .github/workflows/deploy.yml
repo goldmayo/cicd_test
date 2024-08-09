@@ -1,0 +1,31 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        run: |
+          echo "$EC2_KEY" | base64 -d > deploy_key.pem
+          chmod 600 deploy_key.pem
+
+      - name: Copy files to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no -i deploy_key.pem -r . $EC2_USER@$AWS_EC2_IP:~/project-root
+
+      - name: Deploy on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i deploy_key.pem $EC2_USER@$AWS_EC2_IP << 'EOF'
+            cd ~/project-root
+            docker-compose down || true
+            docker-compose up -d --build
+          EOF

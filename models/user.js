@@ -74,6 +74,11 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: true,
     },
+    kakaoId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true,
+    },
 }, {
     tableName: 'users',
     timestamps: true,

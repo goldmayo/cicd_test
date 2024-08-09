@@ -1,4 +1,6 @@
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
@@ -8,6 +10,11 @@ const initModels = require('./models');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const sslOptions = {
+  key: fs.readFileSync('~/Desktop/privkey.pem'),
+  cert: fs.readFileSync('~/Desktop/fullchain.pem'),
+};
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

@@ -28,8 +28,8 @@ services:
     ports:
       - "443:443"
     volumes:
-      - /home/ec2-user/keycloak/fullchain.pem:/etc/ssl/certs/fullchain.pem
-      - /home/ec2-user/keycloak/privkey.pem:/etc/ssl/private/privkey.pem
+      - /home/ec2-user/keys/fullchain.pem:/etc/ssl/certs/fullchain.pem
+      - /home/ec2-user/keys/privkey.pem:/etc/ssl/private/privkey.pem
     depends_on:
       - mysql
     networks:

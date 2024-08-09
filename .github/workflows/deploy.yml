@@ -20,6 +20,9 @@ jobs:
 
       - name: Copy files to EC2
         run: |
+          mkdir -p ~/project-root
+          chown ec2-user:ec2-user ~/project-root
+          chmod 755 ~/project-root
           scp -o StrictHostKeyChecking=no -i aikey.pem -r . $${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }}:~/project-root
 
       - name: Deploy on EC2

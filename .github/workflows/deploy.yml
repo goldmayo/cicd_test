@@ -32,11 +32,11 @@ jobs:
 
       - name: Copy files to EC2
         run: |
-          scp -o StrictHostKeyChecking=no -i aikey.pem -r * ${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }}:~/project-root
+          scp -vvv -o StrictHostKeyChecking=no -i aikey.pem -r * ${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }}:~/project-root
 
       - name: Deploy on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i aikey.pem ${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }} << EOF
+          ssh -vvv -o StrictHostKeyChecking=no -i aikey.pem ${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }} << EOF
             cd ~/project-root
             docker-compose down || true
             docker-compose up -d --build

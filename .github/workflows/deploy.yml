@@ -20,7 +20,7 @@ jobs:
 
       - name: Copy files to EC2
         run: |
-          scp -o StrctHostKeyChecking=no -i deploy_key.pem -r . $${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }}:~/project-root
+          scp -o StrictHostKeyChecking=no -i deploy_key.pem -r . $${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }}:~/project-root
 
       - name: Deploy on EC2
         run: |

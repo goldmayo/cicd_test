@@ -12,8 +12,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const sslOptions = {
-  key: fs.readFileSync('~/Desktop/privkey.pem'),
-  cert: fs.readFileSync('~/Desktop/fullchain.pem'),
+  key: fs.readFileSync('~/privkey.pem'),
+  cert: fs.readFileSync('~/fullchain.pem'),
 };
 
 app.use(bodyParser.json());

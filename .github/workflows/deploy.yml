@@ -13,9 +13,9 @@ jobs:
 
       - name: Set up SSH
         run: |
-          echo "${{ secrets.EC2_KEY }}" | base64 -d > test_key.pem
+          echo "${{ secrets.EC2_KEY }}" > test_key.pem
           head -n 5 test_key.pem  # 첫 5줄만 출력하여 키의 일부를 확인
-          echo "${{ secrets.EC2_KEY }}" | base64 -d > aikey.pem
+          echo "${{ secrets.EC2_KEY }}" > aikey.pem
           chmod 400 aikey.pem
           echo "SSH Key Created:"
           ls -la aikey.pem  # 파일의 권한과 존재 여부를 확인

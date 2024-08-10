@@ -15,16 +15,16 @@ jobs:
         run: |
           echo "${{ secrets.EC2_KEY }}" > test_key.pem
           head -n 5 test_key.pem  # 첫 5줄만 출력하여 키의 일부를 확인
-          echo "${{ secrets.EC2_KEY }}" > aikey.pem
-          chmod 600 aikey.pem
+          echo "${{ secrets.EC2_KEY }}" > nestjs-cotept.pem
+          chmod 600 nestjs-cotept.pem
           echo "SSH Key Created:"
-          ls -la aikey.pem  # 파일의 권한과 존재 여부를 확인
+          ls -la nestjs-cotept.pem  # 파일의 권한과 존재 여부를 확인
           echo "SSH Key Content:"
-          head -n 5 aikey.pem  # 키 내용의 일부만 출력 (보안상 이유로 일부만 출력)
+          head -n 5 nestjs-cotept.pem  # 키 내용의 일부만 출력 (보안상 이유로 일부만 출력)
 
       - name: Set up project directory on EC2
         run: |
-          ssh -vvv -o StrictHostKeyChecking=no -i aikey.pem -J ${{ secrets.EC2_USER }}@${{ secrets.PUBLIC_EC2_IP }} ${{ secrets.EC2_USER }}@${{ secrets.PRIVATE_EC2_IP }} << 'EOF'
+          ssh -vvv -o StrictHostKeyChecking=no -i nestjs-cotept.pem -J ${{ secrets.EC2_USER }}@${{ secrets.PUBLIC_EC2_IP }} ${{ secrets.EC2_USER }}@${{ secrets.PRIVATE_EC2_IP }} << 'EOF'
             mkdir -p ~/project-root
             chown $USER:$USER ~/project-root
             chmod 755 ~/project-root
@@ -32,11 +32,11 @@ jobs:
 
       - name: Copy files to EC2
         run: |
-          rsync -avz -e "ssh -J ${{ secrets.EC2_USER }}@${{ secrets.PUBLIC_EC2_IP }} -i aikey.pem -o StrictHostKeyChecking=no" --exclude='node_modules' --exclude='.git' --exclude='.gitignore' ./ ${{ secrets.EC2_USER }}@${{ secrets.PRIVATE_EC2_IP }}:~/project-root
+          rsync -avz -e "ssh -J ${{ secrets.EC2_USER }}@${{ secrets.PUBLIC_EC2_IP }} -i nestjs-cotept.pem -o StrictHostKeyChecking=no" --exclude='node_modules' --exclude='.git' --exclude='.gitignore' ./ ${{ secrets.EC2_USER }}@${{ secrets.PRIVATE_EC2_IP }}:~/project-root
 
       - name: Deploy on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i aikey.pem -J ${{ secrets.EC2_USER }}@${{ secrets.PUBLIC_EC2_IP }} ${{ secrets.EC2_USER }}@${{ secrets.PRIVATE_EC2_IP }} << EOF
+          ssh -o StrictHostKeyChecking=no -i nestjs-cotept.pem -J ${{ secrets.EC2_USER }}@${{ secrets.PUBLIC_EC2_IP }} ${{ secrets.EC2_USER }}@${{ secrets.PRIVATE_EC2_IP }} << EOF
             cd ~/project-root
             docker-compose down || true
             docker-compose up -d --build

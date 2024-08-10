@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { findOrCreateUser } = require('../config/passport');
+const { findOrCreateUserNaver, findOrCreateUserKakao} = require('../config/passport');
 const jwt = require('jsonwebtoken');
 
 exports.kakaoAuth = (req, res) => {
@@ -37,7 +37,7 @@ exports.kakaoLogin = async (req, res) => {
             },
         });
 
-        const user = await findOrCreateUser(userInfoResponse.data);
+        const user = await findOrCreateUserKakao(userInfoResponse.data);
 
         // JWT 토큰 생성
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
@@ -53,3 +53,57 @@ exports.kakaoLogin = async (req, res) => {
         res.status(500).json({ message: '카카오 로그인 실패', error: error.message });
     }
 };
+
+////////////////////////////
+
+exports.naverAuth = (req, res) => {
+    const CLIENT_ID = process.env.NAVER_CLIENT_ID;
+    const REDIRECT_URI = encodeURI(process.env.NAVER_REDIRECT_URI);
+    const STATE = process.env.NAVER_STATE;
+
+    const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&state=${STATE}`;
+
+    res.redirect(naverAuthUrl);
+};
+
+exports.naverLogin = async (req, res) => {
+    const { code, state } = req.query;
+
+    try {
+        const tokenResponse = await axios.post('https://nid.naver.com/oauth2.0/token', null, {
+            params: {
+                grant_type: 'authorization_code',
+                client_id: process.env.NAVER_CLIENT_ID,
+                client_secret: process.env.NAVER_CLIENT_SECRET,
+                code: code,
+                state: state,
+            },
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        });
+
+        const { access_token } = tokenResponse.data;
+
+        const userInfoResponse = await axios.get('https://openapi.naver.com/v1/nid/me', {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+            },
+        });
+
+        const user = await findOrCreateUserNaver(userInfoResponse.data);
+
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+            expiresIn: process.env.JWT_EXPIRES_IN,
+        });
+
+        res.status(200).json({
+            message: '로그인 성공',
+            token,
+        });
+    } catch (error) {
+        console.error('네이버 로그인 오류:', error);
+        res.status(500).json({ message: '네이버 로그인 실패', error: error.message });
+    }
+};
+

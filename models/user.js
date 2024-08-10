@@ -79,6 +79,11 @@ const User = sequelize.define('User', {
         allowNull: true,
         unique: true,
     },
+    naverId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true,
+    }
 }, {
     tableName: 'users',
     timestamps: true,

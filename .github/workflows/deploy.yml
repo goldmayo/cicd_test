@@ -24,7 +24,7 @@ jobs:
 
       - name: Set up project directory on EC2
         run: |
-          ssh -vvv -o StrictHostKeyChecking=no -i aikey.pem ${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }} << EOF
+          ssh -vvv -o StrictHostKeyChecking=no -i aikey.pem -J ${{ secrets.EC2_USER }}@${{ secrets.PUBLIC_EC2_IP }} ${{ secrets.EC2_USER }}@${{ secrets.PRIVATE_EC2_IP }} << EOF
             mkdir -p ~/project-root
             chown $USER:$USER ~/project-root
             chmod 755 ~/project-root
@@ -32,11 +32,11 @@ jobs:
 
       - name: Copy files to EC2
         run: |
-          rsync -avz -e "ssh -i aikey.pem -o StrictHostKeyChecking=no" --exclude='node_modules' --exclude='.git' --exclude='.gitignore' ./ ${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }}:~/project-root
+          rsync -avz -e "ssh -J ${{ secrets.EC2_USER }}@${{ secrets.PUBLIC_EC2_IP }} -i aikey.pem -o StrictHostKeyChecking=no" --exclude='node_modules' --exclude='.git' --exclude='.gitignore' ./ ${{ secrets.EC2_USER }}@${{ secrets.PRIVATE_EC2_IP }}:~/project-root
 
       - name: Deploy on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i aikey.pem ${{ secrets.EC2_USER }}@${{ secrets.AWS_EC2_IP }} << EOF
+          ssh -o StrictHostKeyChecking=no -i aikey.pem -J ${{ secrets.EC2_USER }}@${{ secrets.PUBLIC_EC2_IP }} ${{ secrets.EC2_USER }}@${{ secrets.PRIVATE_EC2_IP }} << EOF
             cd ~/project-root
             docker-compose down || true
             docker-compose up -d --build

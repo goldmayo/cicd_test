@@ -11,16 +11,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up SSH
+      - name: Set up SSH key for Public EC2
         run: |
-          echo "${{ secrets.EC2_KEY }}" > test_key.pem
-          head -n 5 test_key.pem  # 첫 5줄만 출력하여 키의 일부를 확인
           echo "${{ secrets.EC2_KEY }}" > nestjs-cotept.pem
           chmod 600 nestjs-cotept.pem
           echo "SSH Key Created:"
           ls -la nestjs-cotept.pem  # 파일의 권한과 존재 여부를 확인
           echo "SSH Key Content:"
           head -n 5 nestjs-cotept.pem  # 키 내용의 일부만 출력 (보안상 이유로 일부만 출력)
+
+      - name: Copy PEM key to Public EC2
+        run: |
+          scp -o StrictHostKeyChecking=no -i nestjs-cotept.pem nestjs-cotept.pem ubuntu@${{ secrets.PUBLIC_EC2_IP }}:/home/ubuntu/.ssh/nestjs-cotept.pem
+          ssh -o StrictHostKeyChecking=no -i nestjs-cotept.pem ubuntu@${{ secrets.PUBLIC_EC2_IP }} "chmod 600 /home/ubuntu/.ssh/nestjs-cotept.pem"
 
       - name: Set up project directory on EC2
         run: |

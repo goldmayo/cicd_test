@@ -19,6 +19,7 @@ jobs:
           ls -la nestjs-cotept.pem  # 파일의 권한과 존재 여부를 확인
           echo "SSH Key Content:"
           head -n 5 nestjs-cotept.pem  # 키 내용의 일부만 출력 (보안상 이유로 일부만 출력)
+          
 
       - name: Copy PEM key to Public EC2
         run: |

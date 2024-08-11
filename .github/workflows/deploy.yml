@@ -13,6 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install AWS CLI and Elastic Beanstalk CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+          pip install --upgrade awsebcli
+
       - name: Build Docker image
         run: |
           docker build -t seonlim .

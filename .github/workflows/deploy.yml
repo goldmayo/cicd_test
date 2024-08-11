@@ -27,7 +27,7 @@ jobs:
 
       - name: Set up project directory on EC2
         run: |
-          ssh -tt -o ForwardAgent=yes -o StrictHostKeyChecking=no -i nestjs-cotept.pem -J ubuntu@${{ secrets.PUBLIC_EC2_IP }} ec2-user@${{ secrets.PRIVATE_EC2_IP }} << 'EOF'
+          ssh -vvv -tt -o ForwardAgent=yes -o StrictHostKeyChecking=no -i nestjs-cotept.pem -J ubuntu@${{ secrets.PUBLIC_EC2_IP }} ec2-user@${{ secrets.PRIVATE_EC2_IP }} << 'EOF'
             mkdir -p ~/project-root
             chown $USER:$USER ~/project-root
             chmod 755 ~/project-root

@@ -2,16 +2,14 @@ name: Deploy to Elastic Beanstalk
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  deploy:
+  build_and_deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -33,17 +31,25 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: seonlim
+          environment_name: Elpsycongroo
+          version_label: ${{ github.sha }}
+          region: ap-northeast-2
+          deployment_package: Dockerrun.aws.json
+
       - name: Update Dockerrun.aws.json
         run: |
-          sed -i 's|"Name": ".*"|"Name": "${{ steps.login-ecr.outputs.registry }}/seonlim:${{ github.sha }}"|' Dockerrun.aws.json
+          sed -i 's|"Image": ".*"|"Image": "${{ steps.login-ecr.outputs.registry }}/seonlim:${{ github.sha }}"|' Dockerrun.aws.json
 
-
-      - name: Initialize EB CLI
+      - name: Commit and push if changed
         run: |
-          pip install awsebcli
-          eb init seonlim -p docker -r ap-northeast-2
-          eb use Elpsycongroo-env
-
-      - name: Deploy to Elastic Beanstalk
-        run: |
-          eb deploy --staged
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add Dockerrun.aws.json
+          git commit -m "Update Dockerrun.aws.json with new image tag" || exit 0
+          git push

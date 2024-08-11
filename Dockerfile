@@ -1,4 +1,4 @@
-FROM node:20
+FROM node:lts
 
 # Set working directory
 WORKDIR /usr/src/app
@@ -15,4 +15,4 @@ COPY . .
 
 # Expose port and start application
 EXPOSE 3000
-CMD [ "node", "index.js" ]
+CMD [ "node", "app.js" ]

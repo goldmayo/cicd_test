@@ -27,6 +27,7 @@ app.use(cors({
 app.get('/', (req, res) => {
   res.status(200).send('OK');
 });
+
 app.use('/users', userRoutes);
 app.use('/my-page', myPageRoutes);
 app.use('/oauth', authRoutes);

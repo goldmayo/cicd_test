@@ -37,8 +37,13 @@ jobs:
         run: |
           sed -i 's|"Name": ".*"|"Name": "${{ steps.login-ecr.outputs.registry }}/seonlim:${{ github.sha }}"|' Dockerrun.aws.json
 
-      - name: Deploy to Elastic Beanstalk
+
+      - name: Initialize EB CLI
         run: |
           pip install awsebcli
+          eb init seonlim -p docker -r ap-northeast-2
           eb use Elpsycongroo-env
+
+      - name: Deploy to Elastic Beanstalk
+        run: |
           eb deploy --staged

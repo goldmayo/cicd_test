@@ -1,9 +1,9 @@
-name: Deploy to Private EC2
+name: Deploy to Elastic Beanstalk
 
 on:
   push:
     branches:
-      - main
+      - main  # main 브랜치에 푸시될 때마다 배포 실행
 
 jobs:
   deploy:
@@ -13,42 +13,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up SSH key
-        env:
-          EC2_KEY: ${{ secrets.EC2_KEY }}
+      - name: Build Docker image
         run: |
-          mkdir -p ~/.ssh
-          echo "$EC2_KEY" > ~/.ssh/ec2_key.pem
-          chmod 600 ~/.ssh/ec2_key.pem
+          docker build -t seonlim .
 
-      - name: Set up SSH config
+      - name: Login to Amazon ECR
         run: |
-          echo "Host bastion" >> ~/.ssh/config
-          echo "  HostName ${{ secrets.PUBLIC_EC2_IP }}" >> ~/.ssh/config
-          echo "  User ubuntu" >> ~/.ssh/config
-          echo "  IdentityFile ~/.ssh/ec2_key.pem" >> ~/.ssh/config
-          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-          echo "" >> ~/.ssh/config
-          echo "Host private" >> ~/.ssh/config
-          echo "  HostName ${{ secrets.PRIVATE_EC2_IP }}" >> ~/.ssh/config
-          echo "  User ec2-user" >> ~/.ssh/config
-          echo "  IdentityFile ~/.ssh/ec2_key.pem" >> ~/.ssh/config
-          echo "  ProxyJump bastion" >> ~/.ssh/config
-          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com
 
-      - name: Set up project directory on Private EC2
+      - name: Tag Docker image
         run: |
-          ssh private 'mkdir -p ~/project-root && chmod 755 ~/project-root'
+          docker tag seonlim:latest 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:latest
 
-      - name: Copy files to Private EC2
+      - name: Push Docker image to Amazon ECR
         run: |
-          rsync -avz -e "ssh -J bastion" --exclude='node_modules' --exclude='.git' --exclude='.gitignore' ./ private:~/project-root/
+          docker push 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:latest
 
-      - name: Deploy on Private EC2
+      - name: Deploy to Elastic Beanstalk
         run: |
-          ssh private << EOF
-            cd ~/project-root
-            docker-compose down || true
-            docker-compose up -d --build
-          EOF
-          
+          eb init -p docker seonlim --region ap-northeast-2
+          eb use Elpsycongroo-env
+          eb deploy
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+

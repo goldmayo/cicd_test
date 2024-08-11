@@ -1,3 +1,5 @@
+name: Deploy to Private EC2
+
 on:
   push:
     branches:
@@ -11,37 +13,40 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up SSH key for Public EC2
+      - name: Set up SSH key
+        env:
+          EC2_KEY: ${{ secrets.EC2_KEY }}
         run: |
-          echo "${{ secrets.EC2_KEY }}" > nestjs-cotept.pem
-          chmod 600 nestjs-cotept.pem
-          echo "SSH Key Created:"
-          ls -la nestjs-cotept.pem  # 파일의 권한과 존재 여부를 확인
-          echo "SSH Key Content:"
-          head -n 5 nestjs-cotept.pem  # 키 내용의 일부만 출력 (보안상 이유로 일부만 출력)
+          mkdir -p ~/.ssh
+          echo "$EC2_KEY" > ~/.ssh/ec2_key.pem
+          chmod 600 ~/.ssh/ec2_key.pem
 
-      - name: Copy PEM key to Public EC2
+      - name: Set up SSH config
         run: |
-          scp -o StrictHostKeyChecking=no -i nestjs-cotept.pem nestjs-cotept.pem ubuntu@${{ secrets.PUBLIC_EC2_IP }}:/home/ubuntu/.ssh/nestjs-cotept.pem
-          ssh -o StrictHostKeyChecking=no -i nestjs-cotept.pem ubuntu@${{ secrets.PUBLIC_EC2_IP }} "chmod 600 /home/ubuntu/.ssh/nestjs-cotept.pem"
+          echo "Host bastion" >> ~/.ssh/config
+          echo "  HostName ${{ secrets.PUBLIC_EC2_IP }}" >> ~/.ssh/config
+          echo "  User ubuntu" >> ~/.ssh/config
+          echo "  IdentityFile ~/.ssh/ec2_key.pem" >> ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          echo "" >> ~/.ssh/config
+          echo "Host private" >> ~/.ssh/config
+          echo "  HostName ${{ secrets.PRIVATE_EC2_IP }}" >> ~/.ssh/config
+          echo "  User ec2-user" >> ~/.ssh/config
+          echo "  IdentityFile ~/.ssh/ec2_key.pem" >> ~/.ssh/config
+          echo "  ProxyJump bastion" >> ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
 
-      - name: Set up project directory on EC2
+      - name: Set up project directory on Private EC2
         run: |
-          ssh -vvv -o StrictHostKeyChecking=no -o ForwardAgent=yes -i nestjs-cotept.pem ubuntu@${{ secrets.PUBLIC_EC2_IP }} ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.PRIVATE_EC2_IP }} << 'EOF'
-            mkdir -p ~/project-root
-            chown $USER:$USER ~/project-root
-            chmod 755 ~/project-root
-          cp /home/ubuntu/project-root/nestjs-cotept.pem /home/ec2-user/nestjs-cotept.pem
-            chmod 600 /home/ec2-user/nestjs-cotept.pem
-          EOF
+          ssh private 'mkdir -p ~/project-root && chmod 755 ~/project-root'
 
-      - name: Copy files to EC2
+      - name: Copy files to Private EC2
         run: |
-          rsync -avz -e "ssh -J ubuntu@${{ secrets.PUBLIC_EC2_IP }} -i nestjs-cotept.pem -o StrictHostKeyChecking=no" --exclude='node_modules' --exclude='.git' --exclude='.gitignore' ./ ec2-user@${{ secrets.PRIVATE_EC2_IP }}:~/project-root
+          rsync -avz -e "ssh -J bastion" --exclude='node_modules' --exclude='.git' --exclude='.gitignore' ./ private:~/project-root/
 
-      - name: Deploy on EC2
+      - name: Deploy on Private EC2
         run: |
-          ssh -tt -o ForwardAgent=yes -o StrictHostKeyChecking=no -i nestjs-cotept.pem -J ubuntu@${{ secrets.PUBLIC_EC2_IP }} ec2-user@${{ secrets.PRIVATE_EC2_IP }} << EOF
+          ssh private << EOF
             cd ~/project-root
             docker-compose down || true
             docker-compose up -d --build

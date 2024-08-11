@@ -21,7 +21,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t seonlim .
+          docker build --no-cache -t seonlim .
 
       - name: Login to Amazon ECR
         run: |

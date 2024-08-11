@@ -15,7 +15,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t my-app .
+          docker build -t seonlim .
 
       - name: Login to Amazon ECR
         run: |
@@ -23,15 +23,15 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          docker tag my-app:latest 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/my-app:latest
+          docker tag seonlim:latest 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:latest
 
       - name: Push Docker image to Amazon ECR
         run: |
-          docker push 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/my-app:latest
+          docker push 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:latest
 
       - name: Deploy to Elastic Beanstalk
         run: |
-          eb init -p docker my-app --region ap-northeast-2
+          eb init -p docker seonlim --region ap-northeast-2
           eb use Elpsycongroo-env
           eb deploy
 

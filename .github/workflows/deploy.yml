@@ -39,7 +39,7 @@ jobs:
         run: |
           eb init -p docker seonlim --region ap-northeast-2
           eb use Elpsycongroo-env
-          eb setenv DEPLOY_TIMESTAMP=$(date +%s)
+          eb setenv DEPLOY_TIMESTAMP=$(date +%s) 
           eb deploy --staged
 
     env:

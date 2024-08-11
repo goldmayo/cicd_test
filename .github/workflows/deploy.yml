@@ -25,15 +25,15 @@ jobs:
 
       - name: Login to Amazon ECR
         run: |
-          sudo aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com
+          aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com
 
       - name: Tag Docker image
         run: |
-          sudo docker tag seonlim:latest 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:latest
+          docker tag seonlim:latest 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:latest
 
       - name: Push Docker image to Amazon ECR
         run: |
-          sudo docker push 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:latest
+          docker push 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:latest
 
       - name: Deploy to Elastic Beanstalk
         run: |

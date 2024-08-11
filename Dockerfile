@@ -1,4 +1,4 @@
-FROM node:lts
+FROM node:20
 
 # Set working directory
 WORKDIR /usr/src/app

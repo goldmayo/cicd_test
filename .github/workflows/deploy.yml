@@ -19,16 +19,9 @@ jobs:
           sudo apt-get install -y awscli
           pip install --upgrade awsebcli
 
-      - name: Delete existing images from ECR
-        run: |
-          IMAGE_TAGS=$(aws ecr list-images --repository-name seonlim --query 'imageIds[*]' --output json)
-          if [ "$IMAGE_TAGS" != "[]" ]; then
-            aws ecr batch-delete-image --repository-name seonlim --image-ids "$IMAGE_TAGS"
-          fi
-
       - name: Build Docker image
         run: |
-          sudo docker build --no-cache -t seonlim .
+          sudo docker build --no-cache -t seonlim:latest .
 
       - name: Login to Amazon ECR
         run: |
@@ -36,11 +29,11 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          docker tag seonlim:latest 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:${{ github.sha }}
+          docker tag seonlim:latest 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:latest
 
       - name: Push Docker image to Amazon ECR
         run: |
-          docker push 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:${{ github.sha }}
+          docker push 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:latest
 
       - name: Deploy to Elastic Beanstalk
         run: |

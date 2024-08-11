@@ -13,7 +13,7 @@ services:
       DATABASE_NAME: SteinsGate
       DATABASE_PORT: 3306
     ports:
-      - "80:3000"
+      - "3000:3000"
 #    volumes:
 #      - /home/ec2-user/keys/fullchain.pem:/etc/ssl/certs/fullchain.pem
 #      - /home/ec2-user/keys/privkey.pem:/etc/ssl/private/privkey.pem

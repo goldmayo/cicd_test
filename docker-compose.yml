@@ -1,25 +1,40 @@
-version: '3.8'
+name: Deploy to Elastic Beanstalk
 
-services:
-  backend:
-    build: .
-    image: kurigohan73/backend:latest
-    container_name: backend
-    restart: unless-stopped
-    environment:
-      DATABASE_HOST: seonlim.c7muuq84guhv.ap-northeast-2.rds.amazonaws.com
-      DATABASE_USER: makisekurisu
-      DATABASE_PASSWORD: elpsycongroo
-      DATABASE_NAME: SteinsGate
-      DATABASE_PORT: 3306
-    ports:
-      - "443:443"
-    volumes:
-      - /home/ec2-user/keys/fullchain.pem:/etc/ssl/certs/fullchain.pem
-      - /home/ec2-user/keys/privkey.pem:/etc/ssl/private/privkey.pem
-    networks:
-      - app-network
+on:
+  push:
+    branches:
+      - main  # main 브랜치에 푸시될 때마다 배포 실행
 
-networks:
-  app-network:
-    driver: bridge
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t my-app .
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com
+
+      - name: Tag Docker image
+        run: |
+          docker tag my-app:latest 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/my-app:latest
+
+      - name: Push Docker image to Amazon ECR
+        run: |
+          docker push 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/my-app:latest
+
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          eb init -p docker my-app --region ap-northeast-2
+          eb use Elpsycongroo-env
+          eb deploy
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

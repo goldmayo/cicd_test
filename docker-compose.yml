@@ -1,43 +1,25 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: mydatabase
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: mypassword
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - app-network
-
   backend:
     build: .
     image: kurigohan73/backend:latest
     container_name: backend
     restart: unless-stopped
     environment:
-      DATABASE_HOST: mysql
-      DATABASE_USER: myuser
-      DATABASE_PASSWORD: mypassword
-      DATABASE_NAME: mydatabase
+      DATABASE_HOST: seonlim.c7muuq84guhv.ap-northeast-2.rds.amazonaws.com
+      DATABASE_USER: makisekurisu
+      DATABASE_PASSWORD: elpsycongroo
+      DATABASE_NAME: SteinsGate
+      DATABASE_PORT: 3306
     ports:
       - "443:443"
     volumes:
       - /home/ec2-user/keys/fullchain.pem:/etc/ssl/certs/fullchain.pem
       - /home/ec2-user/keys/privkey.pem:/etc/ssl/private/privkey.pem
-    depends_on:
-      - mysql
     networks:
       - app-network
 
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  mysql_data:

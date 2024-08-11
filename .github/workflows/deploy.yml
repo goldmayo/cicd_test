@@ -32,7 +32,7 @@ jobs:
             chown $USER:$USER ~/project-root
             chmod 755 ~/project-root
             cp /home/ubuntu/.ssh/nestjs-cotept.pem /home/ec2-user/.ssh/nestjs-cotept.pem
-            chmod 600 /home/ec2-user/.ssh/nestjs-cotept.pem
+            chmod 400 /home/ec2-user/.ssh/nestjs-cotept.pem
           EOF
 
       - name: Copy files to EC2

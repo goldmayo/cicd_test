@@ -23,7 +23,7 @@ jobs:
       - name: Copy PEM key to Public EC2
         run: |
           scp -o StrictHostKeyChecking=no -i nestjs-cotept.pem nestjs-cotept.pem ubuntu@${{ secrets.PUBLIC_EC2_IP }}:/home/ubuntu/.ssh/nestjs-cotept.pem
-          ssh -o StrictHostKeyChecking=no -i nestjs-cotept.pem ubuntu@${{ secrets.PUBLIC_EC2_IP }} "chmod 400 /home/ubuntu/.ssh/nestjs-cotept.pem"
+          ssh -o StrictHostKeyChecking=no -i nestjs-cotept.pem ubuntu@${{ secrets.PUBLIC_EC2_IP }} "chmod 600 /home/ubuntu/.ssh/nestjs-cotept.pem"
 
       - name: Set up project directory on EC2
         run: |

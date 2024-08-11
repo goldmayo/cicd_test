@@ -19,6 +19,7 @@ jobs:
           ls -la nestjs-cotept.pem  # 파일의 권한과 존재 여부를 확인
           echo "SSH Key Content:"
           head -n 5 nestjs-cotept.pem  # 키 내용의 일부만 출력 (보안상 이유로 일부만 출력)
+          
 
       - name: Copy PEM key to Public EC2
         run: |
@@ -27,21 +28,21 @@ jobs:
 
       - name: Set up project directory on EC2
         run: |
-          ssh -vvv -tt -o StrictHostKeyChecking=no -i /home/ubuntu/.ssh/nestjs-cotept.pem -J ubuntu@${{ secrets.PUBLIC_EC2_IP }} ec2-user@${{ secrets.PRIVATE_EC2_IP }} << 'EOF'
+          ssh -vvv -tt -o StrictHostKeyChecking=no -i /home/ubuntu/key/nestjs-cotept.pem ec2-user@${{ secrets.PRIVATE_EC2_IP }} << 'EOF'
             mkdir -p ~/project-root
             chown $USER:$USER ~/project-root
             chmod 755 ~/project-root
-            cp /home/ubuntu/key/nestjs-cotept.pem /home/ec2-user/nestjs-cotept.pem
+            cp /home/ubuntu/project-root/nestjs-cotept.pem /home/ec2-user/nestjs-cotept.pem
             chmod 400 /home/ec2-user/nestjs-cotept.pem
           EOF
 
       - name: Copy files to EC2
         run: |
-          rsync -avz -e "ssh -J ubuntu@${{ secrets.PUBLIC_EC2_IP }} -i /home/ubuntu/key/nestjs-cotept.pem -o StrictHostKeyChecking=no" --exclude='node_modules' --exclude='.git' --exclude='.gitignore' ./ ec2-user@${{ secrets.PRIVATE_EC2_IP }}:~/project-root
+          rsync -avz -e "ssh -J ubuntu@${{ secrets.PUBLIC_EC2_IP }} -i nestjs-cotept.pem -o StrictHostKeyChecking=no" --exclude='node_modules' --exclude='.git' --exclude='.gitignore' ./ ec2-user@${{ secrets.PRIVATE_EC2_IP }}:~/project-root
 
       - name: Deploy on EC2
         run: |
-          ssh -tt -o StrictHostKeyChecking=no -i /home/ubuntu/key/nestjs-cotept.pem -J ubuntu@${{ secrets.PUBLIC_EC2_IP }} ec2-user@${{ secrets.PRIVATE_EC2_IP }} << EOF
+          ssh -tt -o ForwardAgent=yes -o StrictHostKeyChecking=no -i nestjs-cotept.pem -J ubuntu@${{ secrets.PUBLIC_EC2_IP }} ec2-user@${{ secrets.PRIVATE_EC2_IP }} << EOF
             cd ~/project-root
             docker-compose down || true
             docker-compose up -d --build

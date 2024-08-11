@@ -29,17 +29,18 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          docker tag seonlim:latest 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:latest
+          docker tag seonlim:latest 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:${{ github.sha }}
 
       - name: Push Docker image to Amazon ECR
         run: |
-          docker push 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:latest
+          docker push 990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/seonlim:${{ github.sha }}
 
       - name: Deploy to Elastic Beanstalk
         run: |
           eb init -p docker seonlim --region ap-northeast-2
           eb use Elpsycongroo-env
-          eb deploy
+          eb setenv DEPLOY_TIMESTAMP=$(date +%s)
+          eb deploy --staged
 
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

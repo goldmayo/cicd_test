@@ -1,7 +1,7 @@
 {
   "AWSEBDockerrunVersion": "1",
   "Image": {
-    "Name": "990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/cotept-ecr/seonlim:latest",
+    "Name": "990359324762.dkr.ecr.ap-northeast-2.amazonaws.com/cotept-ecr:latest",
     "Update": "true"
   },
   "Ports": [
